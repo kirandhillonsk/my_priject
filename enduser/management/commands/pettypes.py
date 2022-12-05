@@ -1,0 +1,1 @@
+pettypes = ["Dog", "Cat", "Others" ]
