@@ -1,0 +1,229 @@
+{% include "user/includes/header.html" %}
+{% block content %}
+{% load static %}
+
+<link rel="stylesheet" href="{% static 'admin-assets/user-css/add-pet.css' %}" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.js"></script>
+
+<div class="profile-page-wrapper">
+    <div class="form-wrapper theme-form">
+        <form onsubmit="Loader(this.id)" id = "add_pets" action = "{% url 'enduser:add_pet' %}" method = "POST" enctype="multipart/form-data" >
+        {% csrf_token %}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label><i class="far fa-paw-alt"></i> Pet Name</label>
+                        <input type="text" name ="pet_name" placeholder ="pet name" onkeypress="return /[a-zA-Z\s]/i.test(event.key)"  class="form-control" maxlength="40">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="far fa-calendar-alt"></i> Birthdate</label>
+                        <input type="date" name ="pet_age" id="pet_age" maxlength="25" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="far fa-list"></i> Type</label>
+                        <select class="form-control" id ="pet_type" name ="pet_type">
+                            <option value="" selected>Select Pet Type</option>
+                            {% for pet in pet_type %}
+                           <option value="{{pet.id}}">{{pet.name}}</option>
+                           {% endfor %}
+                        </select>
+                    </div>
+                   <div class="form-group" id="newdiv" style="display:none">
+                        <input type="text" placeholder ="enter pet type"  onkeypress="return /[a-zA-Z\s]/i.test(event.key)" name ="other_name" maxlength = "40" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="far fa-weight"></i> Weight (in pounds)</label>
+                        <input type="text" placeholder ="Weight (in pounds)" name ="size" onkeypress="return /[0-9.]/i.test(event.key)" maxlength = "4" class="form-control">
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="far fa-dog"></i> Breed</label>
+                        <input type="text" placeholder ="breed" onkeypress="return /[a-zA-Z\s]/i.test(event.key)"  name ="pet_breed" class="form-control" maxlength="70" >
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="fas fa-venus-mars"></i> Sex</label>
+                        <select class="form-control" name ="pet_gender">
+                        <option value="" selected>Select</option>
+                            <option value="1">Male</option>
+                            <option value="2">Female</option>
+                        </select>
+                    </div>
+                </div>  
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="far fa-dog"></i> Pet Image</label>
+                        <input type="file" name ="pet_image" id="pet_image" multiple class="form-control">
+                        <p class="er2" id ="upload_file_name"  style="color: red"></p>
+
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="far fa-dog"></i> Vaccines</label>
+                        <textarea rows="4"  placeholder ="Please enter all vaccines that your pet has had in the past" cols="50" name ="vaccines"  class="form-control" maxlength = "500" ></textarea>
+
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="far fa-dog"></i> About</label>
+                        <textarea rows="4"  placeholder ="Please describe any medical conditions, allergies, temperament and any other information you would like to share" cols="50" name ="about"  class="form-control" maxlength = "1000" ></textarea>
+                    </div>
+                </div>
+                
+                
+                <div class="col-md-12 mt-4 mb-4">
+                    <p style="font-size: 22px;color: #9ea1b1;font-weight: 500;">Vet Information</p>
+                    <hr>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="far fa-dog"></i> Vet Name</label>
+                        <input type="text" placeholder ="vet name" onkeypress="return /[a-zA-Z\s]/i.test(event.key)" name ="vet_info" class="form-control" maxlength = "70">
+                    </div>
+                </div>
+                 <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="far fa-dog"></i> Vet Email</label>
+                        <input type="email"  placeholder ="vet email"  name ="vet_email" class="form-control" >
+                    </div>
+                </div>
+                 <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="far fa-dog"></i> Vet Phone</label>
+                        <input type="text" placeholder ="vet phone"  name ="vet_phone" minlength="5" maxlength = "12" onkeypress="return /[0-9]/i.test(event.key)" class="form-control" >
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="far fa-dog"></i> Vet Address</label>
+                        <input type="text"  placeholder ="vet address"  name ="vet_adrress" maxlength = "150" class="form-control" >
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label><i class="far fa-dog"></i> Vet Image</label>
+                        <input type="file" name ="vet_image" id="vet_image" multiple class="form-control">
+                    </div>
+                </div>
+                
+            </div>
+            <div class="button-wrap mt-15 mt-md-25 mt-xl-60 text-right">
+                <a href="{% url 'enduser:user_profile' %}" class="btn btn-cancel"><i class="fal fa-long-arrow-left"></i> Cancel</a>
+                <button type ="submit" class="btn btn-theme ml-10">Save <i class="fal fa-long-arrow-right"></i></button>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    $("#pet_image").change(function () {
+        var fileExtension = ['jpeg', 'jpg', 'png'];
+        if ($.inArray($(this).val().split('.').pop().toLowerCase(), fileExtension) == -1) {
+            $(".er2").html("Please upload file in these format only (jpg, jpeg, png)");
+            $(".btn").prop('disabled', true);
+        }
+        else{
+            $(".er2").html("");
+            $(".btn").prop('disabled', false);
+        }
+    });
+</script>
+<script>
+    $(function () {
+        var dtToday = new Date();
+        var month = dtToday.getMonth() + 1;
+        var day = dtToday.getDate();
+        var year = dtToday.getFullYear();
+        if (month < 10)
+            month = '0' + month.toString();
+        if (day < 10)
+            day = '0' + day.toString();
+        var maxDate = year + '-' + month + '-' + day;
+        $('#pet_age').attr('max', maxDate);
+    });
+    $(function () {
+        var dtToday = new Date();
+        var month = dtToday.getMonth() + 1;
+        var day = dtToday.getDate();
+        var year = dtToday.getFullYear() - 15;
+        if (month < 10)
+            month = '0' + month.toString();
+        if (day < 10)
+            day = '0' + day.toString();
+        var maxDate = year + '-' + month + '-' + day;
+        $('#pet_age').attr('min', maxDate);
+    });
+</script>
+<!--form validation-->
+ <script type="text/javascript">
+      $("#add_pets").validate({
+          rules: {
+              pet_name: {
+                  required: true,
+              },
+              pet_age: {
+                  required: true,
+              },
+             
+            
+              
+             pet_gender: {
+                  required: true,
+              },
+              size:{
+                  min:1,
+                  number: true,
+                  max:120
+              },
+              pet_type:{
+                  required: true
+              },
+              other_name:{
+                  required: true
+              },
+          },
+          messages: {
+              pet_name: {
+                  required: "Please enter pet name",
+              },
+              pet_age: {
+                  required: "Please enter birth year",
+
+              },
+             
+        pet_gender: {
+                  required: "Please select gender",
+                 
+              },
+              pet_type:{
+                  required: "Please select pet type"
+              },
+              other_name:{
+                  required: "Please enter pet name"
+              },
+                           
+          }
+      });
+
+</script> 
+<script>
+    $('#pet_image').change(function(){
+   
+        let file_name = $('#pet_image')
+        for (let i = 0 ; i < file_name[0].files.length  ; i++){
+            let nm = file_name[0].files[i].name
+            $('#upload_file_name').append(nm +" <br>")
+        }
+    });
+</script>
+{% endblock %}
+{% include "user/includes/footer.html" %}

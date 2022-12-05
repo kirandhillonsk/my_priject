@@ -1,0 +1,751 @@
+{% load static %}
+{% include 'registration/includes/header.html' %}
+{% block content %}
+{% load socialaccount %}
+<style>
+    .icon-find img {
+        position: absolute;
+        left: 20px;
+        top: 20px;
+        bottom: 0;
+        margin: initial;
+    }
+    .icon-find i.fa-eye,
+    .icon-find i.fal.fa-eye-slash {
+        position: absolute;
+        left: auto;
+        top: 0px;
+        right: 14px;
+    }
+    .toggle-password {
+        position: absolute;
+        right: 25px;
+        top: 21px;
+        font-size: 20px;
+        cursor: pointer;
+    }
+    select#inlineFormCustomSelect {
+        color: black;
+
+    }
+    .tab-sign {
+        padding: 12px 40px;
+        border: 1px solid #ced4da;
+        font-weight: 400;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        width: 330px;
+        max-width: 100%;
+    }
+
+    .tab-sign .image-main {
+        width: 25px;
+        height: 25px;
+        margin-right: 10px;
+    }
+
+    .sign-up-wrap {
+        position: relative;
+        color: #ced4da;
+    }
+
+    .sign-up-wrap::after {
+        border-bottom: 1px solid #ced4da;
+        content: "";
+        position: absolute;
+        width: 100%;
+        top: 50%;
+        z-index: -1;
+        left: 0;
+    }
+
+    .sign-up-email.my-5.font-22 {
+        background-color: #fff;
+        z-index: 1;
+        width: 250px;
+        margin: 0 auto;
+    }
+</style>
+
+<div class="login-register">
+    <div class="container-fluid p-0">
+        <div class="row no-gutters">
+            <div class="col-lg-6 pl-50 pr-50 pl-xl-100 pr-xl-100">
+                <div class="h-100 d-flex align-items-center">
+                    <div class="theme-from w-100 pt-100 pb-100 pt-lg-50 pb-lg-50">
+                        <div class="form-header text-center mb-30 mb-xl-30">
+                            <a href="{% url 'frontend:index' %}"><img src="{% static 'assets/images/logo.png' %}"
+                                    alt="x"></a>
+                            <p class="font-40 mb-10">Get Started</p>
+                            <p class="font-22">Already have an account? <a class=""
+                                    href="{% url 'accounts:web_login' %}">Log In</a>
+                            </p>
+                            <a href="{% provider_login_url 'google' %}">
+                                <div class="tab-sign btn font-22 "><img src="{% static 'assets/images/google.png' %}"
+                                    alt="google" class="image-main">
+                                    <div>Sign up with Google</div>
+                                </div>
+                            </a>
+                            <div class="sign-up-wrap">
+                                <div class="sign-up-email my-5 font-22">Or sign up with email</div>
+                            </div>
+                        </div>
+                        <ul class="nav nav-tabs" id="myTab" role="tablist">
+                            <li class="nav-item">
+                                <a class="nav-link active" id="user-tab" data-toggle="tab" href="#user" role="tab"
+                                    aria-controls="user" aria-selected="true">User</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" id="rvt-tab" data-toggle="tab" href="#rvt" role="tab"
+                                    aria-controls="rvt" aria-selected="false">R/L/CVT</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content" id="myTabContent">
+                            <div class="tab-pane fade show active" id="user" role="tabpanel" aria-labelledby="user-tab">
+                                <form autocomplete="off" id="user-signup" action="{% url 'accounts:web_signup' %}" method="POST" onsubmit="return CheckLatLongUser()">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label class="font-18" for="InputEmail1">First Name</label>
+                                        <div class="icon-find">
+                                            <img src="{% static 'assets/images/user.png' %}" alt="">
+                                            <input type="text" class="form-control" id="first_name"
+                                                onkeypress="return /[a-zA-Z\s]/i.test(event.key)" name="first_name"
+                                                maxlength="50" aria-describedby="emailHelp"
+                                                placeholder="Please enter First Name">
+                                            <p class="err"></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-18" for="InputEmail1">Last Name</label>
+                                        <div class="icon-find">
+                                            <img src="{% static 'assets/images/user.png' %}" alt="">
+                                            <input type="text" class="form-control"
+                                                onkeypress="return /[a-zA-Z\s]/i.test(event.key)" id="last_name"
+                                                name="last_name" maxlength="50" aria-describedby="emailHelp"
+                                                placeholder="Please enter Last Name">
+                                            <p class="err"></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-18" for="InputEmail1">Email address</label>
+                                        <div class="icon-find">
+                                            <img src="{% static 'assets/images/envelope.png' %}" alt="">
+                                            <input type="text" class="form-control" id="email" name="email"
+                                                maxlength="50" aria-describedby="emailHelp"
+                                                placeholder="Please enter email">
+                                            <p class="er"></p>
+                                        </div>
+                                    </div>
+                                    {% comment %} <div class="form-group">
+                                        <label class="font-18" for="InputEmail1">Address</label>
+                                        <div class="icon-find">
+                                            <img src="{% static 'assets/images/envelope.png' %}" alt="">
+                                            <input type="text" class="form-control" id="address"
+                                                aria-describedby="emailHelp" maxlength="150" name="address"
+                                                placeholder="Type Address and select from dropdown">
+                                            <input type="hidden" name="latitude" id="lat" 
+                                            {% if user.latitude %}value="{{user.latitude}}" {% endif %}>
+                                            <input type="hidden" name="longitude" id="long" 
+                                            {% if user.longitude %}value="{{user.longitude}}" {% endif %}>
+                                            <input type="hidden" id="city" maxlength="50" name="city">
+                                            <input type="hidden" id="state" maxlength="50" name="state">
+                                            <input type="hidden" id="country" maxlength="50" name="country">
+                                            <p class="address-error-user error" style="color: red;"></p>
+                                        </div>
+                                    </div> {% endcomment %}
+                                    <div class="form-group">
+                                        <label class="font-18" for="InputPassword1">Password</label>
+                                        <div class="icon-find">
+                                            <img src="{% static 'assets/images/password.png' %}" alt="">
+                                            <input type="password" class="form-control pr-60" id="password"
+                                            maxlength="35" minlength="8" name="password" placeholder="Enter password">
+                                            <span class="fal toggle-password fa-eye-slash"></span>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-18" for="InputPassword1">Confirm Password</label>
+                                        <div class="icon-find">
+                                            <img src="{% static 'assets/images/password.png' %}" alt="">
+                                            <input type="password" name="confirm_password" class="form-control pr-60"
+                                            maxlength="35" minlength="8" placeholder="Confirm password">
+
+                                            <span class="fal toggle-password fa-eye-slash"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row pt-15 mb-22">
+                                        <div class="col-sm-12">
+                                            <div class="form-group d-flex flex-column flex-column-reverse">
+                                                <input type="checkbox" class="form-check-input" name="check" id="Check1"
+                                                    required>
+                                                <label class="form-check-label font-18 text-dark" for="Check1"> I agree
+                                                    to platform's <a href="{% url 'frontend:terms' %}">Terms of
+                                                        Service</a> and <a
+                                                        href="{% url 'frontend:privacy_policy' %}">Privacy
+                                                        Policy.</a></label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="submit"
+                                        class="butn butn-bg font_400 w-100 font-20 font-lg-22 pt-16 pb-16 create_account"><img
+                                            class="mr-6" src="{% static 'assets/images/add-user.png' %}" alt=""> Create
+                                        Free Account</button>
+                                </form>
+                            </div>
+                            <div class="tab-pane fade" id="rvt" role="tabpanel" aria-labelledby="rvt-tab">
+                                <form autocomplete="off" id="rvt-signup" action="{% url 'accounts:rvt_signup' %}" method="POST"
+                                    enctype="multipart/form-data" onsubmit="return CheckLatLongRVT()">
+                                    {% csrf_token %}
+                                    <div class="form-group">
+                                        <label class="font-18" for="InputEmail1">First Name</label>
+                                        <div class="icon-find">
+                                            <img src="{% static 'assets/images/user.png' %}" alt="">
+                                            <input type="text" class="form-control"
+                                                onkeypress="return /[a-zA-Z\s]/i.test(event.key)" id="rvt_first_name"
+                                                name="rvt_first_name" maxlength="50" aria-describedby="emailHelp"
+                                                placeholder="Please enter first Name">
+                                            <p class="err"></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-18" for="InputEmail1">Last Name</label>
+                                        <div class="icon-find">
+                                            <img src="{% static 'assets/images/user.png' %}" alt="">
+                                            <input type="text" class="form-control"
+                                                onkeypress="return /[a-zA-Z\s]/i.test(event.key)" id="rvt_last_name"
+                                                name="rvt_last_name" maxlength="50" aria-describedby="emailHelp"
+                                                placeholder="Please enter last Name">
+                                            <p class="err"></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-18" for="InputEmail1">Email address</label>
+                                        <div class="icon-find">
+                                            <img src="{% static 'assets/images/envelope.png' %}" alt="">
+                                            <input type="text" class="form-control" id="rvt_email"
+                                                aria-describedby="emailHelp" maxlength="50" name="rvt_email"
+                                                placeholder="Please enter email">
+                                            <p class="rvt_e_er"></p>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-18" for="InputEmail1">Address</label>
+                                        <div class="icon-find">
+                                            <img src="{% static 'assets/images/envelope.png' %}" alt="">
+                                            <input autocomplete="off" type="text" class="form-control" id="re_address"
+                                                aria-describedby="emailHelp1" maxlength="150" name="address"
+                                                placeholder="Type Address ">
+                                            <input type="hidden" name="latitude" id="re_lat" {% if user.latitude %}
+                                                value="{{user.latitude}}" {% endif %}>
+                                            <input type="hidden" name="longitude" id="re_long" {% if user.longitude %}
+                                                value="{{user.longitude}}" {% endif %}>
+                                            <input type="hidden" id="re_city" maxlength="50" name="city">
+                                            <input type="hidden" id="re_state" maxlength="50" name="state">
+                                            <input type="hidden" id="re_country" maxlength="50" name="country">
+                                            <p class="address-error-rvt error" style="color: red;"></p>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label class="font-18" for="InputEmail1">Year of Experience</label>
+                                        <div class="icon-find">
+                                            <img src="{% static 'assets/images/rating.png' %}" alt="">
+                                            <select class="custom-select form-control" id="inlineFormCustomSelect"
+                                                name="year_of_experience">
+                                                <option value="">Choose...</option>
+                                                <option value="0">Less than 1 Year</option>
+                                                <option value="1">1 Year</option>
+                                                <option value="2">2 Years</option>
+                                                <option value="3">3 Years</option>
+                                                <option value="4">4 Years</option>
+                                                <option value="5">5+ Years</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-18" for="InputEmail1">License Number(Optional)</label>
+                                        <div class="icon-find">
+                                            <img src="{% static 'assets/images/registration.png' %}" alt="">
+                                            <input type="text" class="form-control" id="Registration"
+                                                aria-describedby="Registration" maxlength="30" minlength="1" name="registration_no"
+                                                placeholder="Enter License Number">
+                                        </div>
+                                    </div> 
+                                    {% comment %} <div class="form-group">
+                                        <label class="font-18" for="InputEmail1">Expiry Date</label>
+                                        <input type="date" class="form-control" id="expiry_date"
+                                            aria-describedby="Registration" name="expiry_date"
+                                            placeholder="Enter expiry date">
+                                    </div> {% endcomment %}
+                                    <div class="form-group">
+                                        <label class="font-18" for="InputPassword1">Upload Resume</label>
+                                        <div class="file-upload">
+                                            <label class="file-select d-flex align-items-center" for="chooseFile">
+                                                <div class="file-select-name mr-auto pl-15" id="noFile">Choose File
+                                                </div>
+                                                <span class="px-3"><img src="{% static 'assets/images/file.png' %}"
+                                                        alt=""> </span>
+                                            </label>
+                                            <input type="file" name="resume" id="chooseFile">
+                                            <p class="text-left" id="resume_er" style="color:red !important"></p>
+                                            <p class="text-left" id="upload_file_name"
+                                                style="color:green !important;font-size: 15px;"></p>
+
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+
+                                        <label class="font-18" for="InputPassword1">Password</label>
+                                        <div class="icon-find">
+                                            <img src="{% static 'assets/images/password.png' %}" alt="">
+                                            <input type="password" class="form-control pr-60" name="rvt_password"
+                                            maxlength="35" minlength="8" id="rvt_password" placeholder="Enter password">
+                                            <span class="fal toggle-password fa-eye-slash"></span>
+
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="font-18" for="InputPassword1">Confirm Password</label>
+                                        <div class="icon-find">
+                                            <img src="{% static 'assets/images/password.png' %}" alt="">
+                                            <input type="password" class="form-control pr-60"
+                                                name="rvt_confirm_password" maxlength="35" minlength="8"
+                                                placeholder="Confirm password">
+                                            <span class="fal toggle-password fa-eye-slash"></span>
+                                        </div>
+                                    </div>
+                                    <div class="row pt-15 mb-22">
+                                        <div class="col-sm-12">
+                                            <div class="form-group d-flex flex-column flex-column-reverse">
+                                                <input type="checkbox" class="form-check-input" name="check2"
+                                                    id="Check2">
+                                                <label class="form-check-label font-18 text-dark" for="Check2"> I agree
+                                                    to platform's <a href="">Terms of Service</a> and <a
+                                                        href="#">Privacy Policy.</a></label>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <button type="submit"
+                                        class="butn butn-bg font_400 w-100 font-20 font-lg-22 pt-16 pb-16"><img
+                                            class="mr-6" src="{% static 'assets/images/add-user.png' %}" alt=""> Create
+                                        Free Account</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6 d-none d-lg-block">
+                <div class="lr-back">
+                    <img src="{% static 'assets/images/register-img.png' %}" alt="x">
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $('#address').change(function(){
+        $('.address-error-user').html("");
+      })
+
+      $('#re_address').change(function(){
+        $('.address-error-rvt').html("");
+      })
+      
+    function CheckLatLongUser(){
+        if ($('#lat').val() && $('#long').val()){
+            $('.address-error-user').html("");
+            Loader();
+            return true;
+        } else {
+            $('.address-error-user').html("Please type the address and select from dropdown");
+            $('#lat').val("");
+            $('#long').val("");
+            return false;
+        }
+    }
+    function CheckLatLongRVT(){
+        if ($('#re_lat').val() && $('#re_long').val()){
+            $('.address-error-rvt').html("");
+            Loader();
+            return true;
+        } else {
+            $('.address-error-rvt').html("Please type the address and select from dropdown");
+            $('#re_lat').val("");
+            $('#re_long').val("");
+            return false;
+        }
+    }
+</script>
+<script type="text/javascript"
+    src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.js"></script>
+<script type="text/javascript">
+    jQuery.validator.addMethod("noSpace", function(value, element) { 
+        return value.indexOf(" ") < 0 && value != ""; 
+      }, "Space are not allowed");
+
+    $("#user-signup").validate({
+        rules: {
+            first_name: {
+                required: true,
+                normalizer: function (value) {
+                    return $.trim(value);
+                }
+            },
+            last_name: {
+                required: true,
+                normalizer: function (value) {
+                    return $.trim(value);
+                }
+            },
+            email: {
+                required: true,
+                email: true,
+                noSpace: true
+            },
+            address: {
+                required: true,
+                normalizer: function (value) {
+                    return $.trim(value);
+                }
+            },
+            password: {
+                required: true,
+                minlength: 8,
+            },
+            confirm_password: {
+                required: true,
+                minlength: 8,
+                equalTo: "#password"
+            },
+            check: {
+                required: true,
+            }
+        },
+        messages: {
+            first_name: {
+                required: "Please enter firstname",
+            },
+            last_name: {
+                required: "Please enter lastname",
+            },
+            email: {
+                required: "Please enter email address",
+                email: "Please enter a valid email address, make sure there are no spaces."
+            },
+            address: {
+                required: "Type Address and select from dropdown",
+            },
+            password: {
+                required: "Please enter password",
+                minlength: jQuery.validator.format("Your password must be 8 characters long")
+            },
+            confirm_password: {
+                required: "Please enter confirm password",
+                minlength: jQuery.validator.format("Your password must be 8 characters long"),
+                equalTo: "Passwords do not match!"
+            },
+            check: {
+                required: "Please Accept Terms & Condition",
+            }
+        }
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $("#email").keyup(function () {
+            var email = $('#email').val();
+            if (email != '' && email != 'undefined' && email != ' ') {
+                $.ajax({
+                    url: "{% url 'accounts:email_validation' %}",
+                    type: 'GET',
+                    data: { 'email_id': email },
+                    success: function (data) {
+                        if (data.valid == 1 && data.exists == 0) {
+
+                            $(".er").html("");
+                            $(".butn").prop('disabled', false);
+                        }
+                        else if (data.exists == 1) {
+
+                            $(".er").html("Email already exist");
+                            $(".butn").prop('disabled', true);
+
+                        }
+                        else {
+                            $(".er").html("Please enter valid mail ");
+                            $(".butn").prop('disabled', true);
+                        }
+                    }
+                });
+            }
+            else {
+                $(".er").html("");
+            }
+        });
+    });
+</script>
+<script>
+    $(document).ready(function () {
+        $("#rvt_email").keyup(function () {
+            var email = $('#rvt_email').val();
+            if (email != '' && email != 'undefined' && email != ' ') {
+                $.ajax({
+                    url: "{% url 'accounts:rvt_email_validation' %}",
+                    type: 'GET',
+                    data: { 'rvt_email_id': email },
+                    success: function (data) {
+                        if (data.valid == 1 && data.exists == 0) {
+
+                            $(".rvt_e_er").html("");
+                            $(".butn").prop('disabled', false);
+                        }
+                        else if (data.exists == 1) {
+
+                            $(".rvt_e_er").html("Email already exist");
+                            $(".butn").prop('disabled', true);
+
+                        }
+                        else {
+                            $(".rvt_e_er").html("Please enter valid mail ");
+                            $(".butn").prop('disabled', true);
+                        }
+                    }
+                });
+            }
+            else {
+                $(".rvt_e_er").html("");
+            }
+        });
+    });
+</script>
+
+<script type="text/javascript">
+    $("#rvt-signup").validate({
+        rules: {
+            rvt_first_name: {
+                required: true,
+                normalizer: function (value) {
+                    return $.trim(value);
+                }
+
+            },
+            rvt_last_name: {
+                required: true,
+                normalizer: function (value) {
+                    return $.trim(value);
+                }
+            },
+            rvt_email: {
+                required: true,
+            },
+            rvt_password: {
+                required: true,
+                minlength: 8,
+            },
+            rvt_confirm_password: {
+                required: true,
+                minlength: 8,
+                equalTo: "#rvt_password"
+            },
+            year_of_experience: {
+                required: true,
+            },
+            registration_no: {
+                required: false,
+                minlength: 1,
+                maxlength: 30,
+            },
+            expiry_date: {
+                required: true,
+            },
+            resume: {
+                required: true,
+            },
+            check2: {
+                required: true,
+                normalizer: function (value) {
+                    return $.trim(value);
+                }
+            },
+            address: {
+                required: true,
+            },
+            city: {
+                required: true,
+            },
+            state: {
+                required: true,
+            },
+            country: {
+                required: true,
+            }
+        },
+        messages: {
+            rvt_first_name: {
+                required: "Please enter firstname",
+            },
+            rvt_last_name: {
+                required: "Please enter lastname",
+            },
+            rvt_email: {
+                required: "Please enter email",
+            },
+            rvt_password: {
+                required: "Please enter password",
+                minlength: jQuery.validator.format("Your password must be 8 characters long")
+            },
+            rvt_confirm_password: {
+                required: "Please enter confirm password",
+                minlength: jQuery.validator.format("Your password must be 8 characters long"),
+                equalTo: "Passwords do not match!"
+            },
+            year_of_experience: {
+                required: "Please select year of experience"
+            },
+            registration_no: {
+                minlength: "please enter the number more than 1 digits",
+                maxlength: "please enter the number not more than 30 digits",
+                required: "please enter license number"
+
+            },
+            resume: {
+                required: "please choose a file"
+            },
+            check2: {
+                required: "Please Accept Terms & Condition",
+            },
+            address: {
+                required: "Please enter the address",
+            },
+            city: {
+                required: "Please enter the city",
+            },
+            state: {
+                required: "Please enter the state",
+            },
+            expiry_date: {
+                required: "Please enter the expiry date",
+            },
+            country: {
+                required: "Please enter the country",
+            }
+        }
+    });
+</script>
+<script>
+    $("#chooseFile").change(function () {
+        var fileExtension = ['pdf', 'jpg', 'png', 'jpeg','doc', 'docx'];
+        if ($.inArray($(this).val().split('.').pop().toLowerCase(), fileExtension) == -1) {
+            $("#resume_er").html("Please upload file in these format only (pdf,jpg, jpeg, png)");
+            $(".butn").prop('disabled', true);
+        }
+        else {
+            $("#resume_er").html("");
+            $(".butn").prop('disabled', false);
+        }
+        $('#upload_file_name').html($('#chooseFile')[0]['files'][0].name);
+    });
+</script>
+<script src="https://maps.googleapis.com/maps/api/js?key={{API_KEY}}&libraries=places"></script>
+<script>
+    var options = {
+        types: ['(cities)'],
+        componentRestrictions: { country: ["in", "us"] }
+    };
+    var re_autocomplete = new google.maps.places.Autocomplete($("#re_address")[0], {});
+    google.maps.event.addListener(re_autocomplete, 'place_changed', function () {
+        var place = re_autocomplete.getPlace();
+        var len = place.address_components.length;
+        var state = ''
+        $.ajax({
+            type: 'GET',
+            url: "{% url 'rvt_lvt:get_user_state_rvt' %}",
+            enctype: 'multipart/form-data',
+            async: false,
+            data: { "lat": place.geometry.location.lat(), "long": place.geometry.location.lng() },
+            success: function (data) {
+                $('#re_state').val(data['state'])
+                $('#re_city').val(data['city'])
+                $('#re_country').val(data['country'])
+            }
+        });
+        $('#re_lat').val(place.geometry.location.lat())
+        $('#re_long').val(place.geometry.location.lng())
+        for (let i = 0; i < place.address_components.length; i++) {
+            if (place.address_components[i]["types"][0] == "country") {
+                $('#re_country').val(place.address_components[i].long_name);
+            }
+            if (place.address_components[i]["types"][0] == "locality") {
+                $('#re_city').val(place.address_components[i].long_name)
+            }
+
+            if (place.address_components[i]["types"][0] == "postal_town") {
+                if ($('#re_city').val() == "") {
+                    $('#re_city').val(place.address_components[i].long_name)
+                }
+            }
+            if (place.address_components[i]["types"][0] == "administrative_area_level_1") {
+                $('#re_state').val(place.address_components[i].long_name)
+            }
+        }
+    });
+    var autocomplete = new google.maps.places.Autocomplete($("#address")[0], {});
+    google.maps.event.addListener(autocomplete, 'place_changed', function () {
+        var place = autocomplete.getPlace();
+        var len = place.address_components.length;
+        var state = ''
+        $.ajax({
+            type: 'GET',
+            url: "{% url 'rvt_lvt:get_user_state_rvt' %}",
+            enctype: 'multipart/form-data',
+            async: false,
+            data: { "lat": place.geometry.location.lat(), "long": place.geometry.location.lng() },
+            success: function (data) {
+                $('#state').val(data['state'])
+                $('#city').val(data['city'])
+                $('#country').val(data['country'])
+            }
+        });
+        $('#lat').val(place.geometry.location.lat())
+        $('#long').val(place.geometry.location.lng())
+        for (let i = 0; i < place.address_components.length; i++) {
+
+            if (place.address_components[i]["types"][0] == "country") {
+                $('#country').val(place.address_components[i].long_name);
+            }
+            if (place.address_components[i]["types"][0] == "locality") {
+                $('#city').val(place.address_components[i].long_name)
+            }
+            if (place.address_components[i]["types"][0] == "postal_town") {
+                if ($('#city').val() == "") {
+                    $('#city').val(place.address_components[i].long_name)
+                }
+            }
+            if (place.address_components[i]["types"][0] == "administrative_area_level_1") {
+                $('#state').val(place.address_components[i].long_name)
+
+            }
+        }
+    });  
+</script>
+<script>
+    $(function () {
+        var dtToday = new Date();
+        var month = dtToday.getMonth() + 1;
+        var day = dtToday.getDate();
+        var year = dtToday.getFullYear();
+        if (month < 10)
+            month = '0' + month.toString();
+        if (day < 10)
+            day = '0' + day.toString();
+
+        var maxDate = year + '-' + month + '-' + day;
+        $('#expiry_date').attr('min', maxDate);
+    });
+</script>
+{% endblock %}
+{% include 'registration/includes/footer.html' %}
